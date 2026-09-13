@@ -100,7 +100,6 @@ private fun MainScreen(refreshKey: Int) {
     if (needsConsent && activity != null) {
         AdsConsentDialog { granted ->
             ConsentStore.save(activity, granted)
-            AdsManager.setUserConsent(activity, granted)
             AdsManager.preloadInterstitial(force = true)
             needsConsent = false
         }

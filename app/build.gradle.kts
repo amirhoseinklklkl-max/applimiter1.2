@@ -4,10 +4,10 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-// کلیدهای تپسل از gradle.properties خوانده می‌شوند تا داخل کد hardcode نشوند
-val tapsellAppId: String = (project.findProperty("TAPSELL_APP_ID") ?: "") as String
-val tapsellInterstitialZone: String = (project.findProperty("TAPSELL_ZONE_INTERSTITIAL") ?: "") as String
-val tapsellBannerZone: String = (project.findProperty("TAPSELL_ZONE_BANNER") ?: "") as String
+// کلیدهای ادیوری از gradle.properties خوانده می‌شوند تا داخل کد hardcode نشوند
+val adiveryAppId: String = (project.findProperty("ADIVERY_APP_ID") ?: "") as String
+val adiveryInterstitialPlacement: String = (project.findProperty("ADIVERY_PLACEMENT_INTERSTITIAL") ?: "") as String
+val adiveryBannerPlacement: String = (project.findProperty("ADIVERY_PLACEMENT_BANNER") ?: "") as String
 
 android {
     namespace = "ir.amir.applimiter"
@@ -17,16 +17,12 @@ android {
         applicationId = "ir.amir.applimiter"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 4
+        versionName = "1.3"
 
-        // App ID تپسل از طریق manifest placeholder به SDK داده می‌شود
-        addManifestPlaceholders(
-            mapOf("TapsellMediationAppKey" to tapsellAppId)
-        )
-
-        buildConfigField("String", "TAPSELL_ZONE_INTERSTITIAL", "\"$tapsellInterstitialZone\"")
-        buildConfigField("String", "TAPSELL_ZONE_BANNER", "\"$tapsellBannerZone\"")
+        buildConfigField("String", "ADIVERY_APP_ID", "\"$adiveryAppId\"")
+        buildConfigField("String", "ADIVERY_PLACEMENT_INTERSTITIAL", "\"$adiveryInterstitialPlacement\"")
+        buildConfigField("String", "ADIVERY_PLACEMENT_BANNER", "\"$adiveryBannerPlacement\"")
     }
 
     buildTypes {
@@ -48,8 +44,6 @@ android {
     }
 }
 
-val tapsellVersion = "1.3.0"
-
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
@@ -62,9 +56,11 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
 
-    // ---- تپسل مدیشن ----
-    implementation("ir.tapsell:tapsell:$tapsellVersion")
-    implementation("ir.tapsell.mediation.adapter:legacy:$tapsellVersion")
+    // ---- ادیوری ----
+    implementation("com.adivery:sdk:4.9.0")
+    // شناسه‌ی تبلیغاتی گوگل (GAID) برای هدف‌گذاری بهتر؛ نسخه عمداً پین شده، جدیدتر نگیر
+    // (18.1.0+ باعث کرش NoClassDefFoundError روی اندروید ۷ می‌شود و 18.3.0 حداقل minSdk 23 می‌خواهد)
+    implementation("com.google.android.gms:play-services-ads-identifier:18.0.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

@@ -38,7 +38,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ir.amir.applimiter.ads.TapsellBanner
+import ir.amir.applimiter.ads.AdiveryBanner
 import ir.amir.applimiter.data.AppEntry
 import ir.amir.applimiter.data.InstalledAppsRepository
 import ir.amir.applimiter.data.LimitConfig
@@ -127,7 +127,7 @@ fun AppListScreen(refreshKey: Int) {
         }
 
         // بنر تبلیغاتی تپسل، چسبیده به پایین صفحه
-        TapsellBanner()
+        AdiveryBanner()
     }
 
     val current = selected
