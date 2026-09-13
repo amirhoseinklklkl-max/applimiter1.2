@@ -66,11 +66,11 @@ object AdsManager {
             listenerRegistered = true
             runCatching {
                 Tapsell.setInitializationListener {
-                    setStatus("SDK آماده شد")
+                    updateStatus("SDK آماده شد")
                     attempts = 0
                     preloadInterstitial()
                 }
-            }.onFailure { setStatus("خطا در ثبت listener: ${it.message}") }
+            }.onFailure { updateStatus("خطا در ثبت listener: ${it.message}") }
         }
         preloadInterstitial()
     }
@@ -103,7 +103,7 @@ object AdsManager {
     /** تبلیغ آنی را از قبل می‌گیرد. اگر شکست خورد، چند بار با فاصله دوباره تلاش می‌کند. */
     fun preloadInterstitial(force: Boolean = false) {
         if (!interstitialEnabled) {
-            setStatus("زون تبلیغ آنی تنظیم نشده")
+            updateStatus("زون تبلیغ آنی تنظیم نشده")
             return
         }
         if (force) {
@@ -112,13 +112,13 @@ object AdsManager {
         }
         if (interstitialAdId != null || requestInFlight) return
         if (attempts >= MAX_ATTEMPTS) {
-            setStatus("تبلیغی موجود نبود (${attempts} تلاش)")
+            updateStatus("تبلیغی موجود نبود (${attempts} تلاش)")
             return
         }
 
         requestInFlight = true
         attempts++
-        setStatus("در حال دریافت تبلیغ… (تلاش $attempts)")
+        updateStatus("در حال دریافت تبلیغ… (تلاش $attempts)")
 
         // Activity را پاس می‌دهیم؛ بعضی شبکه‌ها (اپلوین) بدون آن تبلیغ نمی‌دهند
         val activity = currentActivity()
@@ -128,14 +128,14 @@ object AdsManager {
                 requestInFlight = false
                 attempts = 0
                 interstitialAdId = adId
-                setStatus("تبلیغ آماده است")
+                updateStatus("تبلیغ آماده است")
                 // اگر نمایش در صف بود، همین حالا نشان بده
                 main.post { showIfPending() }
             }
 
             override fun onFailure(message: String) {
                 requestInFlight = false
-                setStatus("دریافت نشد: $message")
+                updateStatus("دریافت نشد: $message")
                 Log.d(TAG, "interstitial request failed: $message")
                 if (attempts < MAX_ATTEMPTS) {
                     main.postDelayed({ preloadInterstitial() }, RETRY_DELAY_MS)
@@ -151,7 +151,7 @@ object AdsManager {
             }
         }.onFailure {
             requestInFlight = false
-            setStatus("خطای درخواست: ${it.message}")
+            updateStatus("خطای درخواست: ${it.message}")
             Log.w(TAG, "interstitial request error: ${it.message}")
         }
     }
@@ -167,7 +167,7 @@ object AdsManager {
 
         val now = System.currentTimeMillis()
         if (!bypassInterval && now - lastShownAt < AdsConfig.INTERSTITIAL_MIN_INTERVAL_MS) {
-            setStatus("فاصله‌ی بین دو تبلیغ رعایت می‌شود")
+            updateStatus("فاصله‌ی بین دو تبلیغ رعایت می‌شود")
             return
         }
 
@@ -190,7 +190,7 @@ object AdsManager {
         pendingShowUntil = 0
         showing = true
         lastShownAt = System.currentTimeMillis()
-        setStatus("در حال نمایش تبلیغ")
+        updateStatus("در حال نمایش تبلیغ")
 
         runCatching {
             Tapsell.showInterstitialAd(
@@ -198,14 +198,14 @@ object AdsManager {
                 activity,
                 object : AdStateListener.Interstitial {
                     override fun onAdImpression() {
-                        setStatus("تبلیغ نمایش داده شد")
+                        updateStatus("تبلیغ نمایش داده شد")
                     }
 
                     override fun onAdClicked() = Unit
 
                     override fun onAdClosed(completionState: AdShowCompletionState) {
                         showing = false
-                        setStatus("تبلیغ بسته شد")
+                        updateStatus("تبلیغ بسته شد")
                         attempts = 0
                         preloadInterstitial()
                     }
@@ -213,7 +213,7 @@ object AdsManager {
                     override fun onAdFailed(message: String) {
                         showing = false
                         lastShownAt = 0L
-                        setStatus("نمایش نشد: $message")
+                        updateStatus("نمایش نشد: $message")
                         Log.d(TAG, "interstitial show failed: $message")
                         attempts = 0
                         preloadInterstitial()
@@ -223,12 +223,12 @@ object AdsManager {
         }.onFailure {
             showing = false
             lastShownAt = 0L
-            setStatus("خطای نمایش: ${it.message}")
+            updateStatus("خطای نمایش: ${it.message}")
             Log.w(TAG, "interstitial show error: ${it.message}")
         }
     }
 
-    private fun setStatus(text: String) {
+    private fun updateStatus(text: String) {
         main.post { status = text }
         Log.d(TAG, text)
     }
